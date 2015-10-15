@@ -116,3 +116,7 @@ class ProtocolVersionError(Exception):
     Thrown if either the server or the client is proposing a version of
     the protocol that is too old.
     """
+
+
+class LdapTimeoutException(Exception):
+    """Thrown if a connection to ldap times out."""

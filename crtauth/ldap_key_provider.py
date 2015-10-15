@@ -74,8 +74,15 @@ class LDAPKeyProvider(key_provider.KeyProvider):
         if self.group:
             group_dn = "cn=%s,cn=groups,%s" % (self.group, self.base_dn)
 
-        result = dict(self.conn.search_s(self.base_dn, ldap.SCOPE_SUBTREE, f,
-                                         ['sshPublicKey']))
+        try:
+            result = dict(self.conn.search_st(self.base_dn,
+                                              ldap.SCOPE_SUBTREE,
+                                              f,
+                                              ['sshPublicKey'],
+                                              timeout=search_timeout))
+        except ldap.TIMEOUT as e:
+            raise exceptions.LdapTimeoutException(
+                "Ldap connection timed out %s" % e)
 
         attributes = result.get("uid=%s,cn=users,%s" % (user, self.base_dn))
         if attributes is None:
