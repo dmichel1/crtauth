@@ -34,7 +34,8 @@ class LDAPKeyProvider(key_provider.KeyProvider):
     cn=groups under the base_dn in the directory information tree. The group
     string parameter corresponds to the cn attribute of the posixGroup entry
     """
-    def __init__(self, uri, auth_user, auth_password, base_dn, group=None):
+    def __init__(self, uri, auth_user, auth_password, base_dn, group=None,
+                 connection_timeout=5):
         """
         Constructs and binds an LDAPKeyProvider instance to the server
         identified by the uri using auth_user and auth_password for
@@ -51,9 +52,10 @@ class LDAPKeyProvider(key_provider.KeyProvider):
         # I know, this is not functionality the ldap module straightforwardly
         # exposes, but it seems to work.
         self.conn = ldap.ldapobject.ReconnectLDAPObject(uri)
+        self.conn.set_option(ldap.OPT_NETWORK_TIMEOUT, connection_timeout)
         self.conn.simple_bind(auth_user, auth_password)
 
-    def get_key(self, username):
+    def get_key(self, username, search_timeout=5):
         """
         Returns a PubKey instance based on LDAP lookup. If group is specified
         in the constructor, the user needs to be a member for the lookup to
